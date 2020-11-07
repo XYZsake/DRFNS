@@ -28,13 +28,13 @@ def HreconstructionErosion(prob_img, h):
     def making_top_mask(x, lamb=h):
        return min(255, x + lamb)
 
-    f = np.vectorize(making_top_mask)
+    f = np.vectorize(making_top_mask) #向量化
     shift_prob_img = f(prob_img)
 
     seed = shift_prob_img
     mask = prob_img
     recons = reconstruction(
-        seed, mask, method='erosion').astype(np.dtype('ubyte'))
+        seed, mask, method='erosion').astype(np.dtype('ubyte'))  #erosion
     return recons
 
 
@@ -43,7 +43,7 @@ def find_maxima(img, convertuint8=False, inverse=False, mask=None):
     Finds all local maxima from 2D image.
     """
     img = PrepareProb(img, convertuint8=convertuint8, inverse=inverse)
-    recons = HreconstructionErosion(img, 1)
+    recons = HreconstructionErosion(img, 1) #突出prob_image的较大值
     if mask is None:
         return recons - img
     else:
@@ -81,12 +81,12 @@ def DynamicWatershedAlias(p_img, lamb, p_thresh = 0.5):
     Applies our dynamic watershed to 2D prob/dist image.
     """
     b_img = (p_img > p_thresh) + 0
-    Probs_inv = PrepareProb(p_img)
+    Probs_inv = PrepareProb(p_img)  #convert from float -> to uint8
 
 
     Hrecons = HreconstructionErosion(Probs_inv, lamb)
     markers_Probs_inv = find_maxima(Hrecons, mask = b_img)
-    markers_Probs_inv = label(markers_Probs_inv)
+    markers_Probs_inv = label(markers_Probs_inv) #连通区域标记
     ws_labels = watershed(Hrecons, markers_Probs_inv, mask=b_img)
     arrange_label = ArrangeLabel(ws_labels)
     wsl = generate_wsl(arrange_label)
